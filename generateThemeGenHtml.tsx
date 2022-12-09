@@ -27,29 +27,28 @@ function renderFullPage(html: string, css: string) {
   `
 }
 
-function renderAndScreenshot() {
+export function generateThemeGeneHtml(components: React.ComponentType[]) {
   const cache = createEmotionCache()
   const { extractCriticalToChunks, constructStyleTagsFromChunks } =
     createEmotionServer(cache)
 
-  // Render the component to a string.
-  const html = ReactDOMServer.renderToString(
-    <CacheProvider value={cache}>
-      <ThemeProvider theme={theme}>
-        {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-        <CssBaseline />
-        <App />
-      </ThemeProvider>
-    </CacheProvider>
-  )
+  const renderedStrings = components.map((Component) => {
+    const html = ReactDOMServer.renderToString(
+      <CacheProvider value={cache}>
+        <ThemeProvider theme={theme}>
+          {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+          <CssBaseline />
+          <Component />
+        </ThemeProvider>
+      </CacheProvider>
+    )
 
-  // Grab the CSS from emotion
-  const emotionChunks = extractCriticalToChunks(html)
-  const emotionCss = constructStyleTagsFromChunks(emotionChunks)
+    const emotionChunks = extractCriticalToChunks(html)
+    const emotionCss = constructStyleTagsFromChunks(emotionChunks)
 
-  // Send the rendered page back to the client.
-  const fullPage = renderFullPage(html, emotionCss)
-  console.log("fullPage", fullPage)
+    // Send the rendered page back to the client.
+    return renderFullPage(html, emotionCss)
+  })
+
+  return renderedStrings
 }
-
-renderAndScreenshot()
